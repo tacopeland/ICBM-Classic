@@ -15,7 +15,33 @@ jobs:
     - name: Chmod gradlew
       run: chmod a+x ./gradlew
     - name: Build with Gradle
-      run: ./gradlew build  
+      run: ./gradlew setupGithubActions build  
+    - name: CF upload
+      uses: itsmeow/curseforge-upload@master
+      id: cf-upload
+      with:
+        token: ${{ secrets.CF_API_TOKEN }}
+        project_id: 244451
+        game_endpoint: minecraft
+        file_path: build/libs/ICBM-classic-${{ steps.build.outputs.version }}.jar
+        changelog: --to be added--
+        changelog_type: html
+        display_name: ICBM - Classic ${{ steps.build.outputs.version }}-UNSTABLE build ${{steps.build.outputs.buildNumber}}
+        game_versions: minecraft-1-12:1.12.2,Java 8,Forge
+        release_type: alpha
+    - name: CF upload deobf
+      uses: itsmeow/curseforge-upload@master
+      with:
+        token: ${{ secrets.CF_API_TOKEN }}
+        project_id: 244451
+        parent_file_id: ${{steps.cf-upload.outputs.id}}
+        game_endpoint: minecraft
+        file_path: build/libs/ICBM-classic-${{ steps.build.outputs.version }}-deobf.jar
+        changelog: --to be added--
+        changelog_type: html
+        display_name: ICBM - Classic ${{ steps.build.outputs.version }}-UNSTABLE-deobf build ${{steps.build.outputs.buildNumber}}
+        game_versions: minecraft-1-12:1.12.2,Java 8,Forge
+        release_type: alpha
   sonarCloudTrigger:
     name: SonarCloud Trigger
     runs-on: ubuntu-latest
