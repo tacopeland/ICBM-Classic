@@ -116,3 +116,11 @@ jacocoTestReport {
         xml.enabled true
     }
 }
+
+task setupGithubActions() {
+    doLast {
+        exec {
+            commandLine "echo", "##[set-output name=version;]${project.version}";
+        }
+    }
+}
