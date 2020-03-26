@@ -122,5 +122,8 @@ task setupGithubActions() {
         exec {
             commandLine "echo", "##[set-output name=version;]${project.version}";
         }
+        exec {
+            commandLine "echo", "##[set-output name=buildNumber;]" + project.getBuildNumber();
+        }
     }
 }
