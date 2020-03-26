@@ -341,7 +341,7 @@ gui.coordinator.wip=More features coming soon!
 gui.assembler.name=Missile Table
 gui.radar.coords=Coordinates:
 gui.radar.zoneSafe=Trigger Zone:
-gui.radar.zoneAlarm=Detection Zone:
+gui.radar.zoneAlarm=Scan Zone:
 gui.radar.on=Radar On!
 gui.radar.nopower=No Electricity!
 
