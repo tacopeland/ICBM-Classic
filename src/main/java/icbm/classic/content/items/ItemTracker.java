@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
@@ -75,6 +76,13 @@ public class ItemTracker extends ItemICBMElectrical implements IRecipeContainer
         if (entity != null)
         {
             itemStack.stackTagCompound.setInteger("trackingEntity", entity.getEntityId());
+        }
+        
+        if (entity instanceof EntityPlayer && ((EntityPlayer) entity).getEntityWorld().getWorldInfo().getWorldName().contains("spawn")) {
+            EntityPlayer p = (EntityPlayer) entity;
+            ChatComponentText msg = new ChatComponentText("!!! WARNING !!! YOU ARE BEING TRACKED");
+            msg.getChatStyle().setColor(EnumChatFormatting.DARK_RED);
+            p.addChatMessage(msg);
         }
     }
 

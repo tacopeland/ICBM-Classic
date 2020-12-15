@@ -23,8 +23,10 @@ import icbm.classic.ICBMClassic;
 import icbm.classic.Settings;
 import icbm.classic.content.entity.EntityMissile;
 import icbm.classic.content.entity.EntityPlayerSeat;
+import icbm.classic.content.entity.EntityPlayerSeatHoming;
 import icbm.classic.content.explosive.Explosive;
 import icbm.classic.content.explosive.Explosives;
+import icbm.classic.content.explosive.ex.missiles.Missile;
 import icbm.classic.content.items.ItemMissile;
 import icbm.classic.content.machines.launcher.frame.TileLauncherFrame;
 import icbm.classic.content.machines.launcher.screen.TileLauncherScreen;
@@ -142,7 +144,15 @@ public class TileLauncherBase extends TileModuleMachine implements IPacketIDRece
                 //Create seat if missile
                 if (getMissileStack() != null && seat == null)
                 {
-                    seat = new EntityPlayerSeat(worldObj);
+                	Explosive ex = Explosives.get(getMissileStack().getItemDamage()).handler;
+                	if (ex.getExplosiveName().equals("icbm.explosive.homing.name"))
+                	{
+                		seat = new EntityPlayerSeatHoming(worldObj);
+                	}
+                	else
+                	{
+                		seat = new EntityPlayerSeat(worldObj);
+                	}
                     seat.host = this;
                     seat.rideOffset = new Pos(getFacing().offsetX * 0.5, 1, getFacing().offsetZ * 0.5);
                     seat.setPosition(x() + 0.5, y() + 0.5, z() + 0.5);

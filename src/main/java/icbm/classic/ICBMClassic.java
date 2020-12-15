@@ -71,7 +71,7 @@ import java.util.Arrays;
  *
  * @author Calclavia
  */
-@Mod(modid = ICBMClassic.DOMAIN, name = "ICBM-Classic", version = ICBMClassic.VERSION, dependencies = ICBMClassic.DEPENDENCIES)
+@Mod(modid = ICBMClassic.DOMAIN, name = "ICBM-Classic", version = "2.16.4.3", dependencies = ICBMClassic.DEPENDENCIES)
 public final class ICBMClassic extends AbstractMod
 {
     @Instance(ICBMClassic.DOMAIN)
