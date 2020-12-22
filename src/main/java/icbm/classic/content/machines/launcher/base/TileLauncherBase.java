@@ -521,6 +521,10 @@ public class TileLauncherBase extends TileModuleMachine implements IPacketIDRece
     @Override
     public boolean onMultiTileBroken(IMultiTile tileMulti, Object source, boolean harvest)
     {
+    	if (seat != null)
+    	{
+    		seat.setDead();
+    	}
         if (!_destroyingStructure && tileMulti instanceof TileEntity)
         {
             Pos pos = new Pos((TileEntity) tileMulti).sub(new Pos((TileEntity) this));

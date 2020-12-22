@@ -4,6 +4,7 @@ import com.builtbroken.mc.core.registry.implement.IRecipeContainer;
 import com.builtbroken.mc.lib.helper.LanguageUtility;
 import com.builtbroken.mc.lib.helper.recipe.UniversalRecipe;
 import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -75,6 +76,14 @@ public class ItemTracker extends ItemICBMElectrical implements IRecipeContainer
 
         if (entity != null)
         {
+        	if (entity instanceof EntityPlayer)
+        	{
+        		EntityPlayer ep = (EntityPlayer) entity;
+        		if (FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().func_152596_g((ep).getGameProfile()))
+        		{
+        			return;
+        		}
+        	}
             itemStack.stackTagCompound.setInteger("trackingEntity", entity.getEntityId());
         }
         
