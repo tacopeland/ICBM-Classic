@@ -7,6 +7,7 @@ import icbm.classic.content.entity.EntityExplosion;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 public class BlastAntimatter extends Blast
 {
@@ -61,6 +62,7 @@ public class BlastAntimatter extends Blast
                                 if (dist < this.getRadius() - 1 || oldWorld().rand.nextFloat() > 0.7)
                                 {
                                     targetPosition.setBlockToAir();
+                                    
                                 }
                             }
                         }

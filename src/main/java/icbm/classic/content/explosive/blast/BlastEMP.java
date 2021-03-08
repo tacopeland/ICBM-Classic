@@ -5,8 +5,11 @@ import com.builtbroken.mc.framework.energy.UniversalEnergySystem;
 import com.builtbroken.mc.imp.transform.region.Cube;
 import com.builtbroken.mc.imp.transform.vector.Pos;
 import com.builtbroken.mc.lib.world.map.radar.RadarRegistry;
+
+import appeng.tile.powersink.AEBasePoweredTile;
 import icbm.classic.ICBMClassic;
 import icbm.classic.content.entity.EntityExplosive;
+import mekanism.api.energy.IStrictEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -14,12 +17,15 @@ import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import physica.forcefield.PhysicaForcefields;
+import physica.forcefield.common.tile.TileFortronField;
+import physica.forcefield.common.tile.TileFortronFieldConstructor;
 import resonant.api.explosion.IEMPBlock;
-import resonant.api.explosion.IEMPItem;
 import resonant.api.explosion.IMissile;
 
 import java.util.List;
@@ -53,12 +59,19 @@ public class BlastEMP extends Blast
         {
             if (this.effectBlocks)
             {
+            	ArrayList<TileFortronFieldConstructor> constructors = PhysicaForcefields.getRelevantConstructors(oldWorld(), x(), y(), z())
+            	
                 for (int x = (int) -this.getRadius(); x < (int) this.getRadius(); x++)
                 {
                     for (int y = (int) -this.getRadius(); y < (int) this.getRadius(); y++)
                     {
                         for (int z = (int) -this.getRadius(); z < (int) this.getRadius(); z++)
                         {
+                        	for (TileFortronFieldConstructor constructor : constructors) {
+                            	if (constructor.isProtecting(x, y, z))
+                            		System.out.println("Constructor is protecting block");
+                            		constructor.damageForcefield(30);
+                            }
                             double dist = MathHelper.sqrt_double((x * x + y * y + z * z));
 
                             Pos searchPosition = new Pos(x, y, z).add(position);
@@ -78,10 +91,6 @@ public class BlastEMP extends Blast
                             //TODO more EMP effect to UniversalEnergySystem to better support cross mod support
                             if (block != null)
                             {
-                                //if (block instanceof IForceFieldBlock)
-                                //{
-                                //    ((IForceFieldBlock) block).weakenForceField(world(), searchPosition.xi(), searchPosition.yi(), searchPosition.zi(), 1000);
-                                //}
                                 if (block instanceof IEMPBlock)
                                 {
                                     ((IEMPBlock) block).onEMP(oldWorld(), searchPosition.xi(), searchPosition.yi(), searchPosition.zi(), this);
@@ -90,11 +99,43 @@ public class BlastEMP extends Blast
 
                             if (tileEntity != null)
                             {
-                                //if (tileEntity instanceof IFortronStorage)
-                                //{
-                                //    ((IFortronStorage) tileEntity).provideFortron((int) world().rand.nextFloat() * ((IFortronStorage) tileEntity).getFortronCapacity(), true);
-                                //}
-                                UniversalEnergySystem.clearEnergy(tileEntity, true);
+                            	if (tileEntity instanceof TileFortronField) {
+                            		TileFortronFieldConstructor ffTile = (TileFortronFieldConstructor) ((TileFortronField) tileEntity).getConstructorCoord().getTile(oldWorld());
+                            		ffTile.damageForcefield(100);
+                            	}
+                            	else if (tileEntity instanceof AEBasePoweredTile) {
+                            		AEBasePoweredTile storage = (AEBasePoweredTile) tileEntity;
+                            		storage.setInternalCurrentPower(0.0d);
+                            		storage.markForUpdate();
+                            	} else if (tileEntity instanceof IStrictEnergyStorage) {
+                            		IStrictEnergyStorage storage = (IStrictEnergyStorage) tileEntity;
+                            		storage.setEnergy(0.0d);
+                            	}
+                            	else
+                            	{
+                            		NBTTagCompound tags = new NBTTagCompound();
+                            		tileEntity.writeToNBT(tags);
+                            		if (!tags.hasNoTags()) {
+                            			if (tags.hasKey("electricityStored") && tags.getString("tier") != "Creative")
+                            			{
+                            				tags.setDouble("electricityStored", 0.0d);
+                            			}
+                            			else if (tags.hasKey("EnergyF"))
+                            			{
+                            				tags.setFloat("EnergyF", 0.0f);
+                            			}
+                            			else if (tags.hasKey("Energy"))
+                            			{
+                            				tags.setDouble("Energy", 0.0d);
+                            			}
+                            			else if (tags.hasKey("energyStorage"))
+                            			{
+                            				tags.getCompoundTag("energyStorage").setInteger("Energy", 0);
+                            			}
+                            		}
+                            		tileEntity.readFromNBT(tags);
+                            		UniversalEnergySystem.clearEnergy(tileEntity, true);
+                            	}
                             }
                         }
                     }
@@ -155,11 +196,45 @@ public class BlastEMP extends Blast
 
                                 if (itemStack != null)
                                 {
+                                	NBTTagCompound tags = itemStack.getTagCompound();
+                                	if (tags != null) {
+                                		// Modular Powersuits
+                                		if (tags.hasKey("mmmpsmod"))
+                                		{
+                                			tags.getCompoundTag("mmmpsmod").setDouble("Current Energy", 0.0d);
+                                		}
+                                		// Mekanism/galacticraft
+                                		else if (tags.hasKey("electricity"))
+                                		{
+                                			tags.setDouble("electricity", 0.0d);
+                                		}
+                                		// Applied Energistics 2
+                                		else if (tags.hasKey("power"))
+                                		{
+                                			tags.setDouble("power", 0.0d);
+                                		}
+                                		else if (tags.hasKey("energy"))
+                                		{
+                                			tags.setDouble("energy", 0.0d);
+                                		}
+                                		else if (tags.hasKey("Energy"))
+                                		{
+                                			tags.setDouble("Energy", 0.0d);
+                                		}
+                                		// Redstone Flux
+                                		else if (tags.hasKey("internalCurrentPower"))
+                                		{
+                                			tags.setDouble("internalCurrentPower", 0.0d);
+                                		}
+                                	}
+                                	itemStack.setTagCompound(tags);
+                                	/*
                                     if (itemStack.getItem() instanceof IEMPItem)
                                     {
                                         ((IEMPItem) itemStack.getItem()).onEMP(itemStack, entity, this);
                                     }
                                     UniversalEnergySystem.clearEnergy(itemStack, true);
+                                    */
                                 }
                             }
                         }
